@@ -1,0 +1,110 @@
+{
+  "version": "1.0",
+  "case_insensitive": true,
+
+  "scanner_order": [
+    "COMMENT_PARENSTAR",   
+    "COMMENT_BRACE",       
+    "RANGE_OPERATOR",      
+    "ASSIGN_OPERATOR",     
+    "RELATIONAL_OPERATOR_2", 
+    "PUNCTUATION",         
+    "ARITHMETIC_OPERATOR_SYMBOL", 
+    "WORD_OPERATORS",      
+    "KEYWORD",             
+    "IDENTIFIER",
+    "NUMBER_REAL",         
+    "NUMBER_INT",          
+    "CHAR_LITERAL",
+    "STRING_LITERAL",
+    "WHITESPACE"           
+  ],
+
+  "types": [
+    "KEYWORD",
+    "LOGICAL_OPERATOR",
+    "IDENTIFIER",
+    "NUMBER",              
+    "CHAR_LITERAL",
+    "STRING_LITERAL",
+    "ARITHMETIC_OPERATOR",
+    "RELATIONAL_OPERATOR",
+    "ASSIGN_OPERATOR",
+    "SEMICOLON",
+    "COMMA",
+    "COLON",
+    "DOT",
+    "LPARENTHESIS",
+    "RPARENTHESIS",
+    "LBRACKET",
+    "RBRACKET",
+    "RANGE_OPERATOR",
+    "WHITESPACE",
+    "UNKNOWN"
+  ],
+
+  "keywords": [
+    "program","var","begin","end","if","then","else","while","do","for","to","downto",
+    "integer","real","boolean","char","array","of","procedure","function","const","type"
+  ],
+
+  "word_operators": {
+    "logical": ["and","or","not"],
+    "arithmetic": ["div","mod"]
+  },
+
+  "arithmetic_operators_symbol": ["+","-","*","/"],
+  "relational_operators_symbol": ["=","<>","<","<=",">",">="],
+  "assign_operator": [":="],
+
+  "punctuation": {
+    "SEMICOLON": ";",
+    "COMMA": ",",
+    "COLON": ":",
+    "DOT": ".",
+    "LPARENTHESIS": "(",
+    "RPARENTHESIS": ")",
+    "LBRACKET": "[",
+    "RBRACKET": "]"
+  },
+
+  "range_operator": [".."],
+
+  "comments": {
+    "brace": { "start": "{", "end": "}" },
+    "paren_star": { "start": "(*", "end": "*)" }
+  },
+
+  "patterns": {
+    "IDENTIFIER": "^[A-Za-z][A-Za-z0-9]*$",
+    "NUMBER_REAL": "^[0-9]+\\.[0-9]+$",
+    "NUMBER_INT": "^[0-9]+$",
+    "CHAR_LITERAL": "^'([^'\\n\\r]|'')'$",
+    "STRING_LITERAL": "^'([^'\\n\\r]|'')*'$",
+    "WHITESPACE": "^[\\t\\r\\n\\f ]+$"
+  },
+
+  "classification_rules": [
+    "if lexeme matches COMMENT delimiters -> skip content (no token)",
+    "exact 'div'|'mod' -> ARITHMETIC_OPERATOR",
+    "exact 'and'|'or'|'not' -> LOGICAL_OPERATOR",
+    "exact keyword list -> KEYWORD",
+    "exact ':=' -> ASSIGN_OPERATOR",
+    "exact '..' -> RANGE_OPERATOR",
+    "exact any of relational (<= >= <>) -> RELATIONAL_OPERATOR",
+    "exact any of single-char relational (= < >) -> RELATIONAL_OPERATOR",
+    "exact punctuation map -> mapped token type",
+    "exact any of + - * / -> ARITHMETIC_OPERATOR",
+    "regex NUMBER_REAL -> NUMBER",
+    "regex NUMBER_INT -> NUMBER",
+    "regex CHAR_LITERAL -> CHAR_LITERAL",
+    "regex STRING_LITERAL -> STRING_LITERAL",
+    "regex IDENTIFIER -> IDENTIFIER",
+    "regex WHITESPACE -> WHITESPACE",
+    "otherwise -> UNKNOWN"
+  ],
+
+  "output_format": "TOKEN_TYPE(value)",
+
+  "skip_types": ["WHITESPACE"]
+}
