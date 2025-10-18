@@ -20,8 +20,6 @@ class TokenType(Enum):
     LBRACKET = auto()
     RBRACKET = auto()
     RANGE_OPERATOR = auto()
-    COMMENT_START = auto()
-    COMMENT_END = auto()
     WHITESPACE = auto()
     UNKNOWN = auto()
 
@@ -30,13 +28,11 @@ KEYWORDS = {
     "integer","real","boolean","char","array","of","procedure","function","const","type"
 }
 
-LOGICAL_OPS = {"and","or","not"}  
+WORD_LOGICAL = {"and","or","not"}
+WORD_ARITH = {"div","mod"}
 
-ARITH_OPS_SYMBOL = {"+","-","*","/"}
-ARITH_OPS_WORD = {"div","mod"}
-
+ARITH_SYMBOL = {"+","-","*","/"}
 REL_OPS = {"=","<>","<","<=",">",">="}
-
 ASSIGN = {":="}
 RANGE = {".."}
 
@@ -51,11 +47,6 @@ PUNCTUATION = {
     "]": TokenType.RBRACKET,
 }
 
-COMMENTS = {
-    "brace": {"start": "{", "end": "}"},
-    "paren_star": {"start": "(*", "end": "*)"},
-}
-
 LONGEST_FIRST = ["(*", "*)", ":=", "..", "<=", ">=", "<>"]
 
 @dataclass
@@ -65,10 +56,25 @@ class Token:
     line: int
     column: int
 
-def classify_word(lexeme: str) -> TokenType:
+def classify_word_or_operator_word(lexeme: str) -> TokenType:
     low = lexeme.lower()
-    if low in KEYWORDS: return TokenType.KEYWORD
-    if low in LOGICAL_OPS: return TokenType.LOGICAL_OPERATOR
-    if low in ARITH_OPS_WORD: return TokenType.ARITHMETIC_OPERATOR
-    if low in REL_OPS: return TokenType.RELATIONAL_OPERATOR
+    if low in KEYWORDS:
+        return TokenType.KEYWORD
+    if low in WORD_LOGICAL:
+        return TokenType.LOGICAL_OPERATOR
+    if low in WORD_ARITH:
+        return TokenType.ARITHMETIC_OPERATOR
     return TokenType.IDENTIFIER
+
+def classify_punct_or_ops(lexeme: str) -> TokenType | None:
+    if lexeme in ASSIGN:
+        return TokenType.ASSIGN_OPERATOR
+    if lexeme in RANGE:
+        return TokenType.RANGE_OPERATOR
+    if lexeme in REL_OPS:
+        return TokenType.RELATIONAL_OPERATOR
+    if lexeme in ARITH_SYMBOL:
+        return TokenType.ARITHMETIC_OPERATOR
+    if lexeme in PUNCTUATION:
+        return PUNCTUATION[lexeme]
+    return None
