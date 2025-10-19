@@ -13,3 +13,16 @@ Kelompok FRT
 | Jethro Jens Norbert Simatupang  | 13523081 | Implement Main Lexer, Laporan, Testing |
 
 ---
+
+## Deskripsi Program
+
+Pada milestone ini, program berfungsi sebagai lexical analyzer untuk bahasa Pascal-S, yaitu versi sederhana dari bahasa Pascal.  
+Lexer bertugas membaca source code Pascal-S dan mengubahnya menjadi daftar token sesuai aturan formal bahasa.
+Lexer ini menggunakan pendekatan Deterministic Finite Automata (DFA) dan Regular Expression (Regex) yang didefinisikan dalam file `token_spec.json`.
+
+---
+
+## Requirements
+
+- Python ≥ 3.10  
+- `pip` (Python package manager)
