@@ -31,12 +31,12 @@ Lexer ini menggunakan pendekatan Deterministic Finite Automata (DFA) dan Regular
 
 ### Cara Penggunaan Program
 1. Clone Repository
-  https://github.com/JethroJNS/FRT-Tubes-IF2224.git
+https://github.com/JethroJNS/FRT-Tubes-IF2224.git
 2. Jalankan Lexer
-  python -m src.compiler test/milestone-1/[nama file test case]
-  Contoh:
-  python -m src.compiler test/milestone-1/input-5.pas
+python -m src.compiler test/milestone-1/[nama file test case]
+Contoh:
+python -m src.compiler test/milestone-1/input-5.pas
 3. Output
-  Program akan menampilkan daftar token di terminal
+Program akan menampilkan daftar token di terminal
 
 ---
