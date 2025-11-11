@@ -24,12 +24,14 @@ class TokenType(Enum):
     UNKNOWN = auto()
 
 KEYWORDS = {
-    "program","var","begin","end","if","then","else","while","do","for","to","downto",
-    "integer","real","boolean","char","array","of","procedure","function","const","type"
+    "program", "variabel", "mulai", "selesai", "jika", "maka", "selain-itu", 
+    "selama", "lakukan", "untuk", "ke", "turun-ke", "integer", "real", 
+    "boolean", "char", "larik", "dari", "prosedur", "fungsi", "konstanta", "tipe",
+    "kasus", "rekaman", "ulangi", "sampai"
 }
 
-WORD_LOGICAL = {"and","or","not"}
-WORD_ARITH = {"div","mod"}
+WORD_LOGICAL = {"dan", "atau", "tidak"}
+WORD_ARITH = {"bagi", "mod"}
 
 ARITH_SYMBOL = {"+","-","*","/"}
 REL_OPS = {"=","<>","<","<=",">",">="}

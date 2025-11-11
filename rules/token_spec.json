@@ -44,13 +44,15 @@
   ],
 
   "keywords": [
-    "program","var","begin","end","if","then","else","while","do","for","to","downto",
-    "integer","real","boolean","char","array","of","procedure","function","const","type"
+    "program", "variabel", "mulai", "selesai", "jika", "maka", "selain-itu", 
+    "selama", "lakukan", "untuk", "ke", "turun-ke", "integer", "real", 
+    "boolean", "char", "larik", "dari", "prosedur", "fungsi", "konstanta", "tipe",
+    "kasus", "rekaman", "ulangi", "sampai"
   ],
 
   "word_operators": {
-    "logical": ["and","or","not"],
-    "arithmetic": ["div","mod"]
+    "logical": ["dan", "atau", "tidak"],
+    "arithmetic": ["bagi", "mod"]
   },
 
   "arithmetic_operators_symbol": ["+","-","*","/"],
@@ -86,8 +88,8 @@
 
   "classification_rules": [
     "if lexeme matches COMMENT delimiters -> skip content (no token)",
-    "exact 'div'|'mod' -> ARITHMETIC_OPERATOR",
-    "exact 'and'|'or'|'not' -> LOGICAL_OPERATOR",
+    "exact 'bagi'|'mod' -> ARITHMETIC_OPERATOR",
+    "exact 'dan'|'atau'|'tidak' -> LOGICAL_OPERATOR",
     "exact keyword list -> KEYWORD",
     "exact ':=' -> ASSIGN_OPERATOR",
     "exact '..' -> RANGE_OPERATOR",
