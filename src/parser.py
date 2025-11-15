@@ -551,13 +551,23 @@ class Parser:
         # <statement-list> ::= <statement> { SEMICOLON <statement> }
         node = ParseNode("<statement-list>")
 
+        # Periksa apakah token saat ini adalah 'selesai'
+        if self.current() and self.check_keyword("selesai"):
+            return node
+
         node.children.append(self.parse_statement())
 
         while True:
             tok = self.current()
-            if tok is not None and tok.type == TokenType.SEMICOLON:
+            # Berhenti jika menemukan 'selesai' atau token tidak valid
+            if tok is None or self.check_keyword("selesai"):
+                break
+            if tok.type == TokenType.SEMICOLON:
                 semi = self.advance()
                 node.children.append(ParseNode("SEMICOLON", token=semi))
+                # Periksa lagi setelah SEMICOLON apakah berikutnya 'selesai'
+                if self.current() and self.check_keyword("selesai"):
+                    break
                 node.children.append(self.parse_statement())
             else:
                 break
@@ -579,22 +589,22 @@ class Parser:
             raise ParserError("Unexpected end of input in <statement>")
 
         # BEGIN / compound-statement
-        if tok.type == TokenType.KEYWORD and self.check_keyword(tok, "mulai"):
+        if self.check_keyword("mulai"):
             node.children.append(self.parse_compound_statement())
             return node
 
         # IF
-        if tok.type == TokenType.KEYWORD and self.check_keyword(tok, "jika"):
+        if self.check_keyword("jika"):
             node.children.append(self.parse_if_statement())
             return node
 
         # WHILE
-        if tok.type == TokenType.KEYWORD and self.check_keyword(tok, "selama"):
+        if self.check_keyword("selama"):
             node.children.append(self.parse_while_statement())
             return node
 
         # FOR
-        if tok.type == TokenType.KEYWORD and self.check_keyword(tok, "untuk"):
+        if self.check_keyword("untuk"):
             node.children.append(self.parse_for_statement())
             return node
 
