@@ -1,4 +1,4 @@
 program HelloWorld;
-begin
+mulai
   writeln('Hello, world!');
-end.
+selesai.

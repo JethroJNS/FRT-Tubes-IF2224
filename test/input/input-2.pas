@@ -1,10 +1,10 @@
 program Sum;
 
-var
+variabel
   a, b: integer;
 
-begin
+mulai
   a := 5;
   b := a + 10;
   writeln('Result = ', b);
-end.
+selesai.
