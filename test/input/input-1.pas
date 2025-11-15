@@ -1,4 +1,10 @@
-program HelloWorld;
+program Hello;
+
+variabel
+  a, b: integer;
+
 mulai
-  writeln('Hello, world!');
+  a := 5;
+  b := a - 10;
+  writeln('Result = ', b);
 selesai.

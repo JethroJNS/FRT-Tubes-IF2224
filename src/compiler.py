@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 from src.lexer import tokenize
 from src.parser import Parser
-from src.parse_tree import print_parse_tree
+from src.parse_tree import print_tree
 
 def main():
     if len(sys.argv) != 2:
@@ -21,7 +21,7 @@ def main():
     parser = Parser(tokens)
     try:
         root = parser.parse()
-        print_parse_tree(root)
+        print_tree(root)
     except Exception as e:
         print(f"Syntax error: {e}")
 

@@ -27,7 +27,8 @@ KEYWORDS = {
     "program", "variabel", "mulai", "selesai", "jika", "maka", "selain-itu", 
     "selama", "lakukan", "untuk", "ke", "turun-ke", "integer", "real", 
     "boolean", "char", "larik", "dari", "prosedur", "fungsi", "konstanta", "tipe",
-    "kasus", "rekaman", "ulangi", "sampai"
+    "kasus", "rekaman", "ulangi", "sampai",
+    "writeln", "readln", "write", "read"
 }
 
 WORD_LOGICAL = {"dan", "atau", "tidak"}

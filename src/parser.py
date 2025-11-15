@@ -314,7 +314,7 @@ class Parser:
 
     def parse_var_item(self) -> ParseNode:
         # <var-item> ::= <identifier-list> COLON <type> SEMICOLON
-        node = ParseNode("<var-item>")
+        node = ParseNode("<var-declaration>")
 
         node.children.append(self.parse_identifier_list())
 
@@ -608,8 +608,8 @@ class Parser:
             node.children.append(self.parse_for_statement())
             return node
 
-        # KEYWORD(writeln)/KEYWORD(readln) sebagai procedure-call
-        if tok.type == TokenType.KEYWORD and tok.value.lower() in ("writeln", "readln"):
+        # KEYWORD(writeln)/KEYWORD(readln)/KEYWORD(write)/KEYWORD(read) sebagai procedure-call
+        if tok.type == TokenType.KEYWORD and tok.value.lower() in ("writeln", "readln", "write", "read"):
             node.children.append(self.parse_procedure_or_function_call())
             return node
 
@@ -741,12 +741,11 @@ class Parser:
             ident = self.expect(TokenType.IDENTIFIER)
             node.children.append(ParseNode("IDENTIFIER", token=ident))
 
-        # built-in seperti KEYWORD(writeln)
-        elif tok.type == TokenType.KEYWORD and tok.value.lower() in ("writeln", "readln"):
+        elif tok.type == TokenType.KEYWORD and tok.value.lower() in ("writeln", "readln", "write", "read"):
             kw = self.expect_keyword(tok.value.lower())
             node.children.append(ParseNode(f"KEYWORD({kw.value.lower()})", token=kw))
         else:
-            raise ParserError("Expected identifier or keyword(writeln/readln) in <procedure/function-call>")
+            raise ParserError("Expected identifier or keyword(writeln/readln/write/read) in <procedure/function-call>")
 
         # parameter-list
         tok = self.current()
