@@ -40,13 +40,11 @@ def process_children(node: ParseNode) -> List[ParseNode]:
     processed = []
     
     for child in node.children:
-        if child.name == "<statement>" and child.token is None:
-            processed.extend(process_children(child))
-        elif child.name == "<var-declaration>" and node.name == "<var-declaration>":
-            processed.extend(process_children(child))
-        elif child.name == "<procedure/function-call>":
-            new_child = ParseNode("<procedure-call>", child.children, child.token)
-            processed.append(new_child)
+        # Skip empty nodes
+        if child.name == "<statement>" and not child.children and child.token is None:
+            continue
+        elif child.name == "<statement-list>" and not child.children:
+            continue
         elif child.name in ["<additive-operator>", "<multiplicative-operator>", "<relational-operator>"]:
             if child.children and child.children[0].token:
                 operator_token = child.children[0].token

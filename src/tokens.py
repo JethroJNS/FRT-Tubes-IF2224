@@ -24,9 +24,9 @@ class TokenType(Enum):
     UNKNOWN = auto()
 
 KEYWORDS = {
-    "program", "variabel", "mulai", "selesai", "jika", "maka", "selain-itu", 
-    "selama", "lakukan", "untuk", "ke", "turun-ke", "integer", "real", 
-    "boolean", "char", "larik", "dari", "prosedur", "fungsi", "konstanta", "tipe",
+    "program", "variabel", "mulai", "selesai", "jika", "maka", "selainitu", 
+    "selama", "lakukan", "untuk", "ke", "turunke", "integer", "real", 
+    "boolean", "char", "string", "larik", "dari", "prosedur", "fungsi", "konstanta", "tipe",
     "kasus", "rekaman", "ulangi", "sampai",
     "writeln", "readln", "write", "read"
 }
@@ -50,7 +50,7 @@ PUNCTUATION = {
     "]": TokenType.RBRACKET,
 }
 
-LONGEST_FIRST = ["(*", "*)", ":=", "..", "<=", ">=", "<>"]
+LONGEST_FIRST = ["(*", "*)", ":=", "..", "<=", ">=", "<>", "{", "}", "=", "<", ">", "+", "-", "*", "/", ";", ",", ":", ".", "(", ")", "[", "]"]
 
 @dataclass
 class Token:
