@@ -1,7 +1,8 @@
 import sys
 from pathlib import Path
 from src.lexer import tokenize
-from src.reader import Reader
+from src.parser import Parser
+from src.parse_tree import print_parse_tree
 
 def main():
     if len(sys.argv) != 2:
@@ -17,8 +18,12 @@ def main():
         code = f.read()
 
     tokens = tokenize(code)
-    reader = Reader(tokens)
-    reader.read()
+    parser = Parser(tokens)
+    try:
+        root = parser.parse()
+        print_parse_tree(root)
+    except Exception as e:
+        print(f"Syntax error: {e}")
 
 if __name__ == "__main__":
     main()
