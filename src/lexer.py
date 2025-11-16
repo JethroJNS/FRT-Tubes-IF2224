@@ -1,6 +1,6 @@
 import re
 from src.tokens import (
-    Token, TokenType,
+    Token, TokenType, KEYWORDS,
     classify_word_or_operator_word, classify_punct_or_ops,
     LONGEST_FIRST
 )
@@ -25,20 +25,40 @@ def tokenize(source_code: str):
             continue
 
         # Skip komentar dengan tanda kurung kurawal { ... }
-        if ch == "{" and "}" in source_code[i:]:
+        if ch == "{":
+            start_col = col
             end_idx = source_code.find("}", i + 1)
             if end_idx == -1:
                 print(f"Warning: Unclosed comment at line {line}")
                 break
+            # Hitung newlines dalam komentar
+            comment_content = source_code[i:end_idx + 1]
+            newline_count = comment_content.count('\n')
+            if newline_count > 0:
+                line += newline_count
+                last_newline_pos = comment_content.rfind('\n')
+                col = len(comment_content) - last_newline_pos
+            else:
+                col += len(comment_content)
             i = end_idx + 1
             continue
 
         # Skip komentar dengan tanda kurung bintang (* ... *)
-        if source_code.startswith("(*", i):
+        if i + 1 < length and source_code[i:i+2] == "(*":
+            start_col = col
             end_idx = source_code.find("*)", i + 2)
             if end_idx == -1:
                 print(f"Warning: Unclosed comment at line {line}")
                 break
+            # Hitung newlines dalam komentar
+            comment_content = source_code[i:end_idx + 2]
+            newline_count = comment_content.count('\n')
+            if newline_count > 0:
+                line += newline_count
+                last_newline_pos = comment_content.rfind('\n')
+                col = len(comment_content) - last_newline_pos
+            else:
+                col += len(comment_content)
             i = end_idx + 2
             continue
 
@@ -53,33 +73,46 @@ def tokenize(source_code: str):
             token_type = classify_punct_or_ops(matched)
             if token_type:
                 tokens.append(Token(token_type, matched, line, col))
+            else:
+                # Jika tidak dikenali, treat as unknown
+                tokens.append(Token(TokenType.UNKNOWN, matched, line, col))
             i += len(matched)
             col += len(matched)
             continue
 
         # String
         if ch == "'":
-            end_idx = i + 1
-            while end_idx < length and source_code[end_idx] != "'":
-                if source_code[end_idx] == "\n":
-                    line += 1
-                    col = 1
-                end_idx += 1
-            if end_idx >= length:
+            start_col = col
+            j = i + 1
+            while j < length:
+                if source_code[j] == "'":
+                    # Cek jika ini escaped quote ('')
+                    if j + 1 < length and source_code[j + 1] == "'":
+                        j += 2
+                    else:
+                        break
+                elif source_code[j] == "\n":
+                    break  # String literal tidak boleh ada newline
+                else:
+                    j += 1
+            
+            if j >= length or source_code[j] != "'":
                 print(f"Warning: Unterminated string at line {line}")
                 break
-            literal = source_code[i:end_idx + 1]
-            tokens.append(Token(TokenType.STRING_LITERAL, literal, line, col))
-            i = end_idx + 1
+                
+            literal = source_code[i:j + 1]
+            tokens.append(Token(TokenType.STRING_LITERAL, literal, line, start_col))
+            i = j + 1
             col += len(literal)
             continue
 
-        # Keyword
-        if ch.isalpha():
+        # Identifier atau Keyword
+        if ch.isalpha() or ch == '_':
             start = i
-            while i < length and (source_code[i].isalnum() or source_code[i] == "_"):
+            while i < length and (source_code[i].isalnum() or source_code[i] == '_'):
                 i += 1
             lexeme = source_code[start:i]
+            
             token_type = classify_word_or_operator_word(lexeme)
             tokens.append(Token(token_type, lexeme, line, col))
             col += len(lexeme)
@@ -88,13 +121,22 @@ def tokenize(source_code: str):
         # Angka
         if ch.isdigit():
             start = i
-            has_dot = False
-            while i < length and (source_code[i].isdigit() or source_code[i] == "."):
-                if source_code[i] == ".":
-                    if has_dot:
-                        break
-                    has_dot = True
+            # Baca semua digit sampai non-digit
+            while i < length and source_code[i].isdigit():
                 i += 1
+            
+            # Cek jika ada decimal point
+            if i < length and source_code[i] == '.':
+                # Cek karakter setelah dot
+                if i + 1 < length and source_code[i + 1].isdigit():
+                    # Ini number real, include the dot
+                    i += 1  # include the dot
+                    while i < length and source_code[i].isdigit():
+                        i += 1
+                else:
+                    # Ini bukan number real, hanya ambil digitnya saja
+                    pass
+                    
             lexeme = source_code[start:i]
             tokens.append(Token(TokenType.NUMBER, lexeme, line, col))
             col += len(lexeme)

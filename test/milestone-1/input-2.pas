@@ -1,10 +1,10 @@
-program Hello;
+program Sum;
 
-variabel
+var
   a, b: integer;
 
-mulai
+begin
   a := 5;
-  b := a - 10;
+  b := a + 10;
   writeln('Result = ', b);
-selesai.
+end.

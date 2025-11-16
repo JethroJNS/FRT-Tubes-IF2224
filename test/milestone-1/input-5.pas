@@ -1,30 +1,30 @@
 program BubbleSort;
 
-variabel
-  arr: array[1..5] dari integer;
+var
+  arr: array[1..5] of integer;
   i, j, temp: integer;
 
-mulai
+begin
   arr[1] := 5;
   arr[2] := 2;
   arr[3] := 8;
   arr[4] := 1;
   arr[5] := 3;
 
-  untuk i := 1 ke 4 lakukan
-  mulai
-    untuk j := 1 ke 5 - i lakukan
-    mulai
+  for i := 1 to 4 do
+  begin
+    for j := 1 to 5 - i do
+    begin
       if arr[j] > arr[j + 1] then
-      mulai
+      begin
         temp := arr[j];
         arr[j] := arr[j + 1];
         arr[j + 1] := temp;
-      selesai;
-    selesai;
-  selesai;
+      end;
+    end;
+  end;
 
   writeln('Sorted array:');
-  untuk i := 1 ke 5 lakukan
+  for i := 1 to 5 do
     writeln(arr[i]);
-selesai.
+end.

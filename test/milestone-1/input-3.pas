@@ -1,16 +1,16 @@
 program EvenOdd;
 
-variabel
+var
   i: integer;
 
-mulai
+begin
   i := 0;
-  selama i < 5 do
-  mulai
-    if i mod 2 = 0 maka
+  while i < 5 do
+  begin
+    if i mod 2 = 0 then
       writeln(i, ' is even')
-    selain-itu
+    else
       writeln(i, ' is odd');
     i := i + 1;
-  selesai;
-selesai.
+  end;
+end.

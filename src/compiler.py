@@ -18,6 +18,12 @@ def main():
         code = f.read()
 
     tokens = tokenize(code)
+    
+    print("=== TOKENS ===")
+    for i, token in enumerate(tokens):
+        print(f"{i:3}: {token.type.name:20} '{token.value}' at {token.line}:{token.column}")
+    print("==============")
+    
     parser = Parser(tokens)
     try:
         root = parser.parse()
