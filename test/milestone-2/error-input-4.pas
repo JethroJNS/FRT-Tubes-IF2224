@@ -1,3 +1,4 @@
+{Invalid array}
 program ErrorTest4;
 tipe
   Arr = larik[1..10] integer;

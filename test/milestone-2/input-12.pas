@@ -1,4 +1,4 @@
-program LoopCase;
+program Input12;
 variabel x: integer;
 mulai
   ulangi

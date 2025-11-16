@@ -1,4 +1,4 @@
-program ProgramKompleks;
+program Input1;
 konstanta
   MAX = 100;
   MIN = 1;

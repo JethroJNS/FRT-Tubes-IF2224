@@ -1,4 +1,4 @@
-program ArrTest;
+program Input6;
 konstanta MAX = 10;
 tipe
   IntRange = larik[1..MAX] dari integer;

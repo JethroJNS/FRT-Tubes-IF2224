@@ -1,3 +1,4 @@
+{Unclosed declaration}
 program ErrorTest5;
 tipe
   Point = rekaman

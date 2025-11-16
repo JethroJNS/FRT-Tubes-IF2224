@@ -1,4 +1,4 @@
-program ComplexTypes;
+program Input3;
 tipe
   Point = rekaman
     x, y: integer;

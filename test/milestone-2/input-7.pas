@@ -1,4 +1,4 @@
-program BasicStructureTest;
+program Input7;
 
 konstanta
   MAX_SIZE = 100;

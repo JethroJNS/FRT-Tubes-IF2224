@@ -1,4 +1,4 @@
-program CaseTest;
+program Input4;
 variabel
   nilai: char;
 mulai

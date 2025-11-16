@@ -1,3 +1,4 @@
+{Invalid expression}
 program ErrorTest6;
 variabel
   a, b: integer;

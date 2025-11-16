@@ -1,4 +1,4 @@
-program ControlTest;
+program Input2;
 variabel
   i, j: integer;
   flag: boolean;

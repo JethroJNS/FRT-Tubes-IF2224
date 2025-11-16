@@ -1,3 +1,4 @@
+{Missing semicolon}
 program ErrorTest1;
 variabel
   a: integer

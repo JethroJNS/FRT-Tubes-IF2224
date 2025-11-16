@@ -1,7 +1,10 @@
-program SubprogramTest;
+program Input10;
 
 variabel
   globalCounter: integer;
+  num1, num2, num3, output: integer;
+  arr: larik[1..5] dari integer;
+  i: integer;
 
 fungsi Factorial(n: integer): integer;
 variabel
@@ -38,7 +41,7 @@ mulai
     MaxOfThree := c;
 selesai;
 
-prosedur Swap(var x, y: integer);
+prosedur Swap(x, y: integer);
 variabel
   temp: integer;
 mulai
@@ -66,7 +69,7 @@ mulai
   writeln(']');
 selesai;
 
-prosedur ProcessData(value: integer; var result: integer; flag: boolean);
+prosedur ProcessData(value: integer; result: integer; flag: boolean);
 mulai
   jika flag maka
     result := value * 2
@@ -75,11 +78,6 @@ mulai
 selesai;
 
 mulai
-  variabel
-    num1, num2, num3, output: integer;
-    arr: larik[1..5] dari integer;
-    i: integer;
-
   globalCounter := 0;
   num1 := 5;
   num2 := 12;

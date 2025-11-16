@@ -457,10 +457,15 @@ class Parser:
         kw = self.expect_keyword("variabel")
         node.children.append(ParseNode("KEYWORD(variabel)", token=kw))
 
+        # Parse minimal satu var item
         node.children.append(self.parse_var_item())
+        
+        # Parse var items tambahan hanya jika diikuti oleh identifier (bukan assignment)
         while True:
             tok = self.current()
-            if tok is not None and tok.type == TokenType.IDENTIFIER:
+            if (tok is not None and 
+                tok.type == TokenType.IDENTIFIER and 
+                not (self.lookahead(1) and self.lookahead(1).type == TokenType.ASSIGN_OPERATOR)):
                 node.children.append(self.parse_var_item())
             else:
                 break
@@ -1043,14 +1048,32 @@ class Parser:
 
     # ========== 7. Ekspresi dan Operator ==========
     def parse_expression(self) -> ParseNode:
-        # <expression> ::= <simple-expression> [ <relational-operator> <simple-expression> ]
+        # <expression> ::= <simple-expression> 
+        #                  { ( <relational-operator> | LOGICAL_OPERATOR ) <simple-expression> }
         node = ParseNode("<expression>")
         node.children.append(self.parse_simple_expression())
 
-        tok = self.current()
-        if tok and tok.type == TokenType.RELATIONAL_OPERATOR:
-            node.children.append(self.parse_relational_operator())
-            node.children.append(self.parse_simple_expression())
+        while True:
+            tok = self.current()
+            if not tok:
+                break
+                
+            # Cek apakah ada relational operator ATAU logical operator (dan/atau)
+            is_relop = (tok.type == TokenType.RELATIONAL_OPERATOR)
+            is_logical = (tok.type == TokenType.LOGICAL_OPERATOR and 
+                        tok.value.lower() in ("dan", "atau"))
+            
+            if is_relop or is_logical:
+                if is_relop:
+                    node.children.append(self.parse_relational_operator())
+                else:
+                    # Parse logical operator
+                    log_op = self.expect(TokenType.LOGICAL_OPERATOR)
+                    node.children.append(ParseNode(f"LOGICAL_OPERATOR({log_op.value})", token=log_op))
+                
+                node.children.append(self.parse_simple_expression())
+            else:
+                break
 
         return node
 

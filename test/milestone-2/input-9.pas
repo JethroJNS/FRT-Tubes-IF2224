@@ -1,4 +1,4 @@
-program ExpressionTest;
+program Input9;
 
 variabel
   a, b, c, d: integer;

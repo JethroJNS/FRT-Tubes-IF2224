@@ -1,4 +1,4 @@
-program ControlFlowTest;
+program Input8;
 
 variabel
   i, j, k: integer;

@@ -1,6 +1,6 @@
-program ErrorTest2;
+{Missing header}
 variabel
   a: integer;
 mulai
-  a = 10;
+  a := 10;
 selesai.
