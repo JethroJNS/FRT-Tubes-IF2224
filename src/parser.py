@@ -130,8 +130,14 @@ class Parser:
 
         node.children.append(self.parse_program_header()) # <program-header>
         node.children.append(self.parse_declaration_part()) # <declaration-part>
-        node.children.append(self.parse_compound_statement()) # <compound-statement>
-
+        
+        # Cek apakah ada compound statement atau langsung DOT
+        if self.current() and self.current().type == TokenType.KEYWORD and self.current().value.lower() == "mulai":
+            node.children.append(self.parse_compound_statement()) # <compound-statement>
+        else:
+            # Jika tidak ada compound statement, buat node kosong
+            node.children.append(ParseNode("<compound-statement>"))
+        
         dot_tok = self.expect(TokenType.DOT)
         node.children.append(ParseNode("DOT", token=dot_tok)) # DOT
 
@@ -178,6 +184,17 @@ class Parser:
         # { <subprogram-declaration> }  prosedur / fungsi
         while self.check_keyword("prosedur") or self.check_keyword("fungsi"):
             node.children.append(self.parse_subprogram_declaration())
+
+        # PERBAIKAN: Setelah subprogram, mungkin ada deklarasi variabel lagi
+        # Cek ulang untuk const/type/var declarations
+        while self.check_keyword("konstanta"):
+            node.children.append(self.parse_const_declaration())
+        
+        while self.check_keyword("tipe"):
+            node.children.append(self.parse_type_declaration())
+        
+        while self.check_keyword("variabel"):
+            node.children.append(self.parse_var_declaration())
 
         return node
 
@@ -562,8 +579,24 @@ class Parser:
         ident = self.expect(TokenType.IDENTIFIER)
         node.children.append(ParseNode("IDENTIFIER", token=ident))
 
+        # Handle empty parameter list (just parentheses)
         if self.current() and self.current().type == TokenType.LPARENTHESIS:
-            node.children.append(self.parse_formal_parameter_list())
+            # Cek apakah ini parameter list kosong
+            saved_pos = self.pos
+            lp = self.expect(TokenType.LPARENTHESIS)
+            
+            # Jika setelah LPARENTHESIS langsung RPARENTHESIS, ini parameter list kosong
+            if self.current() and self.current().type == TokenType.RPARENTHESIS:
+                rp = self.expect(TokenType.RPARENTHESIS)
+                # Buat node formal parameter list kosong
+                param_node = ParseNode("<formal-parameter-list>")
+                param_node.children.append(ParseNode("LPARENTHESIS", token=lp))
+                param_node.children.append(ParseNode("RPARENTHESIS", token=rp))
+                node.children.append(param_node)
+            else:
+                # Kembalikan posisi dan parse formal parameter list normal
+                self.pos = saved_pos
+                node.children.append(self.parse_formal_parameter_list())
 
         colon = self.expect(TokenType.COLON)
         node.children.append(ParseNode("COLON", token=colon))
@@ -584,12 +617,25 @@ class Parser:
         lp = self.expect(TokenType.LPARENTHESIS)
         node.children.append(ParseNode("LPARENTHESIS", token=lp))
 
+        # Jika langsung ada RPARENTHESIS, berarti parameter list kosong
+        if self.current() and self.current().type == TokenType.RPARENTHESIS:
+            rp = self.expect(TokenType.RPARENTHESIS)
+            node.children.append(ParseNode("RPARENTHESIS", token=rp))
+            return node
+
+        # Parse parameter group pertama
         node.children.append(self.parse_parameter_group())
 
+        # Parse parameter groups tambahan
         while True:
             if self.current() and self.current().type == TokenType.SEMICOLON:
                 semi = self.expect(TokenType.SEMICOLON)
                 node.children.append(ParseNode("SEMICOLON", token=semi))
+                
+                # Jika setelah semicolon langsung ada RPARENTHESIS, break
+                if self.current() and self.current().type == TokenType.RPARENTHESIS:
+                    break
+                    
                 node.children.append(self.parse_parameter_group())
             else:
                 break
@@ -610,20 +656,69 @@ class Parser:
 
     def parse_block(self) -> ParseNode:
         node = ParseNode("<block>")
-        node.children.append(self.parse_declaration_part())
-        node.children.append(self.parse_compound_statement())
+        
+        # Parse declaration part (bisa kosong)
+        # Cek semua kemungkinan deklarasi
+        has_declarations = False
+        while (self.current() and 
+            (self.check_keyword("konstanta") or 
+            self.check_keyword("tipe") or 
+            self.check_keyword("variabel") or
+            self.check_keyword("prosedur") or 
+            self.check_keyword("fungsi"))):
+            
+            if not has_declarations:
+                # Buat declaration part node baru untuk menampung semua deklarasi
+                decl_part = ParseNode("<declaration-part>")
+                node.children.append(decl_part)
+                has_declarations = True
+                
+            # Parse berdasarkan jenis deklarasi
+            if self.check_keyword("konstanta"):
+                decl_part.children.append(self.parse_const_declaration())
+            elif self.check_keyword("tipe"):
+                decl_part.children.append(self.parse_type_declaration())
+            elif self.check_keyword("variabel"):
+                decl_part.children.append(self.parse_var_declaration())
+            elif self.check_keyword("prosedur") or self.check_keyword("fungsi"):
+                decl_part.children.append(self.parse_subprogram_declaration())
+        
+        if not has_declarations:
+            # Jika tidak ada declaration, buat node kosong
+            node.children.append(ParseNode("<declaration-part>"))
+        
+        # Parse compound statement
+        if self.current() and self.current().type == TokenType.KEYWORD and self.current().value.lower() == "mulai":
+            node.children.append(self.parse_compound_statement())
+        else:
+            # Jika tidak ada compound statement, buat node kosong
+            node.children.append(ParseNode("<compound-statement>"))
+            
         return node
 
     # ========== 4. Compound Statement & Statements ==========
     def parse_compound_statement(self) -> ParseNode:
         node = ParseNode("<compound-statement>")
+        
+        # Cek apakah benar-benar ada keyword "mulai"
+        if not self.check_keyword("mulai"):
+            # Jika tidak ada "mulai", return node kosong
+            return node
+            
         mulai = self.expect_keyword("mulai")
         node.children.append(ParseNode("KEYWORD(mulai)", token=mulai))
 
-        node.children.append(self.parse_statement_list())
+        # Parse statement list (bisa kosong)
+        if self.current() and not self.check_keyword("selesai"):
+            node.children.append(self.parse_statement_list())
+        else:
+            node.children.append(ParseNode("<statement-list>"))
 
-        selesai = self.expect_keyword("selesai")
-        node.children.append(ParseNode("KEYWORD(selesai)", token=selesai))
+        # Cek apakah ada keyword "selesai"
+        if self.check_keyword("selesai"):
+            selesai = self.expect_keyword("selesai")
+            node.children.append(ParseNode("KEYWORD(selesai)", token=selesai))
+        
         return node
 
     def parse_statement_list(self) -> ParseNode:
