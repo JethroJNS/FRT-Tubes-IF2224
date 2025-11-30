@@ -1,5 +1,5 @@
 # Tugas Besar IF2224 – Teori Bahasa Formal dan Otomata  
-## **Milestone 2: Syntax Analysis (Pascal-S Compiler)**
+## **Milestone 3: Semantic Analysis (Pascal-S Compiler)**
 
 ---
 
@@ -7,18 +7,20 @@
 Kelompok FRT
 | Nama                            | NIM      | Tugas                                                             |
 |---------------------------------|----------|-------------------------------------------------------------------|
-| Maggie Zeta Rosida S            | 13521117 | Grammar Specification, Laporan, Testing                           |
-| Buege Mahara Putra              | 13523037 | Laporan, Testing                                                  |
-| Hanif Kalyana Aditya            | 13523041 | Grammar Implementation, Main Parser, Parse Tree, Laporan, Testing |
-| Jethro Jens Norbert Simatupang  | 13523081 | Grammar Implementation, Main Parser, Parse Tree, Laporan, Testing |
+| Maggie Zeta Rosida S            | 13521117 | Semantic Analysis, Laporan, Testing                               |
+| Buege Mahara Putra              | 13523037 | Semantic Analysis, Laporan, Testing                               |
+| Hanif Kalyana Aditya            | 13523041 | Semantic Analysis, Laporan, Testing                               |
+| Jethro Jens Norbert Simatupang  | 13523081 | Semantic Analysis, Laporan, Testing                               |
 
 ---
 
 ## Deskripsi Program
 
-Pada milestone ini, program berfungsi sebagai syntax analyzer (parser) untuk bahasa Pascal-S, yang merupakan tahap kedua dalam proses kompilasi setelah lexical analysis. Parser bertugas memeriksa urutan token yang dihasilkan oleh lexer agar sesuai dengan aturan tata bahasa (grammar) dari bahasa Pascal-S.
+Pada milestone ini, program berfungsi sebagai semantic analyzer untuk bahasa Pascal-S, yang merupakan tahap ketiga dalam proses kompilasi setelah lexical analysis dan syntax analysis. Semantic analyzer bertugas memeriksa kebenaran makna program yang sudah benar secara sintaks, dengan memvalidasi konsistensi tipe data, deklarasi variabel dan fungsi, aturan lingkup (scope), serta control flow.
 
-Parser ini menggunakan pendekatan Recursive Descent Parsing yang mengimplementasikan setiap non-terminal dalam grammar sebagai fungsi terpisah, dan membangun Parse Tree lengkap yang merepresentasikan struktur hierarkis program sumber.
+Semantic analyzer ini menggunakan pendekatan Attributed Grammar yang mengimplementasikan aturan semantik melalui Visitor Pattern. Setiap jenis node pada parse tree memiliki fungsi visit terpisah yang bertanggung jawab untuk membangun Abstract Syntax Tree (AST) terdekorasi, mengelola symbol table, dan melakukan type checking.
+
+Program menghasilkan decorated AST yang telah dianotasi dengan informasi tipe data, referensi symbol table, dan informasi scope, serta melaporkan error semantik seperti penggunaan variabel belum terdekralasi, ketidaksesuaian tipe data, atau pelanggaran aturan scope.
 
 ---
 
@@ -34,12 +36,12 @@ Parser ini menggunakan pendekatan Recursive Descent Parsing yang mengimplementas
 ```bash
 git clone https://github.com/JethroJNS/FRT-Tubes-IF2224.git
 ```
-2. Masuk ke direktori repository dan jalankan compiler (Lexer + Parser)
+2. Masuk ke direktori repository dan jalankan compiler (Lexer + Parser + Semantic Analysis)
 
     Contoh command:
 ```bash
-python -m src.compiler test/milestone-2/input-1.pas 
+python -m src.compiler test/milestone-3/input-1.pas 
 ```
-3. Output: program akan menampilkan daftar token diikuti dengan parse tree di terminal
+3. Output: program akan menampilkan daftar token, parse tree, decorated Abstract Syntax Tree (AST), dan symbol tables ke terminal.
 
 ---
