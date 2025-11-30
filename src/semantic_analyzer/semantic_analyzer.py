@@ -264,8 +264,86 @@ class SemanticAnalyzer:
                 self.error(f"Array index out of bounds: {index_value} not in range {array_info['low']}..{array_info['high']}", token)
 
     def validate_variable_initialization(self):
-        pass
+        # Validasi inisialisasi variabel
+        
+        class ValidationState:
+            def __init__(self):
+                self.assigned_vars = set()
+                self.in_subprogram = False
+                self.current_procedure_params = set()
+        
+        state = ValidationState()
+        
+        def process_node(node):
+            if not node:
+                return
+            
+            # Track deklarasi subprogram
+            if hasattr(node, 'node_type'):
+                if node.node_type in ["ProcedureDeclaration", "FunctionDeclaration"]:
+                    state.in_subprogram = True
+                    state.current_procedure_params = set()
+                elif node.node_type == "ForStatement":
+                    # Handle inisialisasi pada for loop counter
+                    if hasattr(node, 'counter_var_name'):
+                        state.assigned_vars.add(node.counter_var_name)
+            
+            # Track parameter procedure call
+            if isinstance(node, ProcedureCallNode):
+                param_vars = set()
+                for param in node.children:
+                    if isinstance(param, VariableNode) and param.identifier:
+                        param_vars.add(param.identifier)
+                state.current_procedure_params = param_vars
+            
+            # Track assignment
+            if isinstance(node, AssignmentNode) and node.children:
+                target = node.children[0]
+                if isinstance(target, VariableNode) and target.identifier:
+                    state.assigned_vars.add(target.identifier)
+            
+            # Cek variabel
+            if isinstance(node, VariableNode) and node.identifier:
+                self._check_variable_usage(node, state)
+            
+            # Rekursif
+            if hasattr(node, 'children'):
+                for child in node.children:
+                    # Skip deklarasi parameter di subprogram
+                    if (state.in_subprogram and 
+                        hasattr(child, 'node_type') and 
+                        child.node_type in ["ParameterGroup", "FormalParameterList"]):
+                        continue
+                    process_node(child)
+        
+        if self.current_ast:
+            process_node(self.current_ast)
 
+    def _check_variable_usage(self, var_node: VariableNode, state: Any):
+        # Helper method untuk check variable usage
+        var_idx = self.symbol_table.find_identifier(var_node.identifier)
+        if var_idx is None:
+            return
+        
+        var_entry = self.symbol_table.tab[var_idx]
+        
+        # Skip checking untuk:
+        # - Bukan variabel biasa
+        # - Parameter formal
+        # - Dalam subprogram declaration  
+        # - Sudah di-assign
+        # - Parameter procedure call
+        if (var_entry["obj"] != ObjType.VARIABLE or
+            var_entry.get("is_param", False) or
+            state.in_subprogram or
+            var_node.identifier in state.assigned_vars or
+            var_node.identifier in state.current_procedure_params):
+            return
+        
+        if var_entry["lev"] in [0, 1]:
+            self.error(f"Variable '{var_node.identifier}' might be used before initialization", 
+                    var_node.token if hasattr(var_node, 'token') else None)
+            
     def visit(self, node: ParseNode) -> ASTNode:
         method_name = f'visit_{node.name.replace("<", "").replace(">", "").replace("-", "_")}'
         method = getattr(self, method_name, self.visit_default)
@@ -342,6 +420,69 @@ class SemanticAnalyzer:
                 subprogram_ast = self.visit(child)
                 if subprogram_ast:
                     ast_node.add_child(subprogram_ast)
+        return ast_node
+    
+    def visit_while_statement(self, node: ParseNode) -> ASTNode:
+        ast_node = ASTNode("WhileStatement")
+        
+        # Process condition
+        if len(node.children) > 0:
+            condition_node = self.visit(node.children[0])
+            ast_node.add_child(condition_node)
+        
+        # Process statement
+        if len(node.children) > 1:
+            stmt_node = self.visit(node.children[1])
+            ast_node.add_child(stmt_node)
+        
+        return ast_node
+
+    def visit_for_statement(self, node: ParseNode) -> ASTNode:
+        ast_node = ASTNode("ForStatement")
+        ast_node.node_type = "ForStatement"
+        
+        # Pattern: untuk <variable> := <expression> ke <expression> lakukan <statement>
+        counter_var_name = None
+        assignment_found = False
+        
+        for i, child in enumerate(node.children):
+            child_ast = self.visit(child)
+            ast_node.add_child(child_ast)
+            
+            # Cari assignment pattern dalam for statement
+            if (i + 2 < len(node.children) and 
+                child.name == "<variable>" and
+                node.children[i + 1].name == "ASSIGN_OPERATOR" and
+                node.children[i + 2].name == "<expression>"):
+                
+                if hasattr(child_ast, 'identifier'):
+                    counter_var_name = child_ast.identifier
+                elif (hasattr(child_ast, 'children') and child_ast.children and
+                    hasattr(child_ast.children[0], 'identifier')):
+                    counter_var_name = child_ast.children[0].identifier
+                assignment_found = True
+                break
+        
+        # Fallback: cari identifier langsung
+        if not counter_var_name:
+            for child in node.children:
+                if child.name == "IDENTIFIER" and child.token:
+                    counter_var_name = child.token.value
+                    break
+        
+        if counter_var_name:
+            ast_node.counter_var_name = counter_var_name
+        
+        return ast_node
+
+    def visit_repeat_statement(self, node: ParseNode) -> ASTNode:
+        ast_node = ASTNode("RepeatStatement")
+        
+        # Statement dan condition
+        for child in node.children:
+            child_ast = self.visit(child)
+            ast_node.add_child(child_ast)
+        
         return ast_node
     
     def visit_subprogram_declaration(self, node: ParseNode) -> ASTNode:
@@ -875,7 +1016,17 @@ class SemanticAnalyzer:
     
     def visit_statement(self, node: ParseNode) -> ASTNode:
         if node.children:
-            return self.visit(node.children[0])
+            first_child = node.children[0]
+            if first_child.name == "<while-statement>":
+                return self.visit_while_statement(first_child)
+            elif first_child.name == "<for-statement>":
+                return self.visit_for_statement(first_child)
+            elif first_child.name == "<repeat-statement>":
+                return self.visit_repeat_statement(first_child)
+            elif first_child.name == "<if-statement>":
+                return self.visit(first_child)
+            else:
+                return self.visit(first_child)
         return ASTNode("Statement", data_type=BaseType.VOID)
     
     def visit_assignment_statement(self, node: ParseNode) -> ASTNode:
